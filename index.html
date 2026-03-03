@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<!-- saved from url=(0055)file:///C:/Users/MihokoGoto/Downloads/qa-tool-html.html -->
+<html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q&amp;A Live</title>
+<script src="./index_files/qrcode.min.js.ダウンロード"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{min-height:100vh;background:linear-gradient(135deg,#1a0533 0%,#0d1b4b 100%);font-family:'Helvetica Neue',sans-serif;color:#fff}
+  header{background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.1);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .logo{font-size:20px;font-weight:800;background:linear-gradient(90deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap}
+  .tab{padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:rgba(255,255,255,.1);color:#fff;transition:all .2s}
+  .tab.active{background:linear-gradient(90deg,#7c3aed,#2563eb)}
+  .container{padding:0 16px 60px;max-width:720px;margin:0 auto}
+  .card{background:rgba(255,255,255,.06);border-radius:16px;padding:20px;margin:16px 0;border:1px solid rgba(255,255,255,.1)}
+  h2{font-size:19px;margin-bottom:16px}
+  input,textarea{width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:15px;outline:none;font-family:inherit}
+  textarea{resize:vertical;min-height:100px}
+  input::placeholder,textarea::placeholder{color:#888}
+  .check-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;cursor:pointer;font-size:14px}
+  .check-row input[type=checkbox]{width:18px;height:18px;accent-color:#7c3aed;cursor:pointer}
+  .btn{width:100%;padding:12px;border-radius:10px;border:none;cursor:pointer;font-size:15px;font-weight:700;background:linear-gradient(90deg,#7c3aed,#2563eb);color:#fff;transition:opacity .2s}
+  .btn:disabled{opacity:.4;cursor:default}
+  .btn-sm{padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:12px}
+  .btn-danger{border-color:#ef4444;color:#ef4444;background:rgba(239,68,68,.1)}
+  .btn-success{border-color:#34d399;color:#34d399;background:rgba(52,211,153,.1)}
+  .counter{text-align:right;font-size:12px;color:#888;margin-bottom:10px}
+  .success-msg{background:rgba(52,211,153,.15);border:1px solid #34d399;border-radius:10px;padding:10px 14px;margin-bottom:12px;color:#34d399;font-weight:600;display:none}
+  .success-msg.show{display:block}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0;align-items:center}
+  .filter-right{margin-left:auto;font-size:13px;color:#a78bfa}
+  .q-card{border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);transition:border-color .3s}
+  .q-card.answered{background:rgba(52,211,153,.06);border-color:rgba(52,211,153,.3)}
+  .q-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(124,58,237,.3);color:#a78bfa}
+  .badge.answered{background:rgba(52,211,153,.2);color:#34d399}
+  .q-time{font-size:12px;color:#888}
+  .q-text{font-size:16px;line-height:1.6;margin:8px 0}
+  .q-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+  .q-author{font-size:13px;color:#a78bfa}
+  .like-btn{padding:5px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#aaa;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s}
+  .like-btn.liked{border-color:#f472b6;background:rgba(244,114,182,.15);color:#f472b6;cursor:default}
+  .admin-actions{display:flex;gap:6px}
+  .empty{text-align:center;color:#888;padding:50px 0;font-size:15px}
+  .qr-section{margin-top:24px;display:flex;flex-direction:column;align-items:center;gap:10px}
+  #qrcode canvas,#qrcode img{border-radius:8px;border:4px solid #fff}
+  .qr-label{font-size:12px;color:#888;text-align:center}
+  .section{display:none}
+  .section.active{display:block}
+  .error-msg{color:#f87171;font-size:13px;margin-top:6px}
+  .admin-header{display:flex;justify-content:space-between;align-items:center;margin:16px 0}
+  .mb10{margin-bottom:10px}
+  .mb12{margin-bottom:12px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">✨ Q&amp;A Live</div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab(&#39;submit&#39;)">質問する</button>
+    <button class="tab" id="tab-board" onclick="switchTab(&#39;board&#39;)">ボード (0)</button>
+    <button class="tab" onclick="switchTab(&#39;admin&#39;)">管理</button>
+  </div>
+</header>
+
+<div class="container">
+  <!-- SUBMIT -->
+  <div id="sec-submit" class="section active">
+    <div class="card">
+      <h2>💬 質問を投稿する</h2>
+      <label class="check-row mb10">
+        <input type="checkbox" id="chk-anon" onchange="toggleAnon()">
+        匿名で投稿する
+      </label>
+      <div id="name-row" class="mb12">
+        <input type="text" id="inp-name" placeholder="お名前（任意）" maxlength="30">
+      </div>
+      <textarea id="inp-text" placeholder="質問を入力してください..." maxlength="300" oninput="updateCounter()"></textarea>
+      <div class="counter"><span id="char-count">0</span>/300</div>
+      <div class="success-msg" id="success-msg">✅ 質問を投稿しました！</div>
+      <button class="btn" id="submit-btn" onclick="submitQ()" disabled="">送信する 🚀</button>
+      <div class="qr-section">
+        <div id="qrcode" title="file:///C:/Users/MihokoGoto/Downloads/qa-tool-html.html"><canvas width="140" height="140" style="display: none;"></canvas><img src="data:image/png;base64,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" style="display: block;"></div>
+        <div class="qr-label" id="qr-label">このURLをスキャンして参加</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOARD -->
+  <div id="sec-board" class="section">
+    <div class="filters">
+      <button class="tab active" id="f-new" onclick="setFilter(&#39;new&#39;)">🕐 新着</button>
+      <button class="tab" id="f-popular" onclick="setFilter(&#39;popular&#39;)">🔥 人気</button>
+      <button class="tab" id="f-answered" onclick="setFilter(&#39;answered&#39;)">✅ 回答済み</button>
+      <span class="filter-right" id="unanswered-count"></span>
+    </div>
+    <div id="board-list"></div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="sec-admin" class="section">
+    <div id="admin-login" class="card">
+      <h2>🔒 管理者ログイン</h2>
+      <input type="password" id="admin-pass" placeholder="パスワードを入力" class="mb12" onkeydown="if(event.key===&#39;Enter&#39;)adminLogin()">
+      <div class="error-msg" id="admin-error"></div>
+      <br><br>
+      <button class="btn" onclick="adminLogin()">ログイン</button>
+      <p style="font-size:12px;color:#888;margin-top:8px;text-align:center">デフォルト: admin1234</p>
+    </div>
+    <div id="admin-panel" style="display:none">
+      <div class="admin-header">
+        <h2 style="margin:0;font-size:18px">🛠 管理パネル — <span id="admin-count">0</span>件</h2>
+        <button class="btn-sm btn-danger" onclick="clearAll()">全削除</button>
+      </div>
+      <div id="admin-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== STATE ==========
+let questions = JSON.parse(localStorage.getItem('qa-questions') || '[]');
+let liked = JSON.parse(localStorage.getItem('qa-liked') || '[]');
+let adminUnlocked = false;
+let currentFilter = 'new';
+let currentTab = 'submit';
+const ADMIN_PASS = 'admin1234';
+
+// ========== STORAGE ==========
+function saveQ() {
+  localStorage.setItem('qa-questions', JSON.stringify(questions));
+}
+
+// ========== TAB ==========
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + tab).classList.add('active');
+  document.querySelectorAll('header .tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  if (tab === 'board') renderBoard();
+  if (tab === 'admin' && adminUnlocked) renderAdmin();
+}
+
+// ========== SUBMIT ==========
+function toggleAnon() {
+  const anon = document.getElementById('chk-anon').checked;
+  document.getElementById('name-row').style.display = anon ? 'none' : 'block';
+}
+function updateCounter() {
+  const v = document.getElementById('inp-text').value;
+  document.getElementById('char-count').textContent = v.length;
+  document.getElementById('submit-btn').disabled = v.trim() === '';
+}
+function submitQ() {
+  const anon = document.getElementById('chk-anon').checked;
+  const name = anon ? '匿名' : (document.getElementById('inp-name').value.trim() || '名無し');
+  const text = document.getElementById('inp-text').value.trim();
+  if (!text) return;
+  const now = new Date();
+  const ts = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  questions.unshift({ id: Date.now().toString(), name, text, likes: 0, answered: false, ts });
+  saveQ();
+  document.getElementById('inp-text').value = '';
+  document.getElementById('char-count').textContent = '0';
+  document.getElementById('submit-btn').disabled = true;
+  updateTabCount();
+  const msg = document.getElementById('success-msg');
+  msg.classList.add('show');
+  setTimeout(() => msg.classList.remove('show'), 3000);
+}
+
+// ========== BOARD ==========
+function setFilter(f) {
+  currentFilter = f;
+  ['new','popular','answered'].forEach(x => document.getElementById('f-'+x).classList.toggle('active', x===f));
+  renderBoard();
+}
+function renderBoard() {
+  const sorted = [...questions].sort((a,b) => {
+    if (currentFilter === 'popular') return b.likes - a.likes;
+    if (currentFilter === 'answered') return (b.answered?1:0)-(a.answered?1:0);
+    return 0;
+  });
+  const unanswered = questions.filter(q => !q.answered).length;
+  document.getElementById('unanswered-count').textContent = '未回答 ' + unanswered + '件';
+  const el = document.getElementById('board-list');
+  if (sorted.length === 0) { el.innerHTML = '<div class="empty">まだ質問はありません 🙌</div>'; return; }
+  el.innerHTML = sorted.map(q => `
+    <div class="q-card ${q.answered?'answered':''}" id="qc-${q.id}">
+      <div class="q-meta">
+        <span class="badge ${q.answered?'answered':''}">${q.answered?'✅ 回答済み':'💬 未回答'}</span>
+        <span class="q-time">${q.ts}</span>
+      </div>
+      <div class="q-text">${escHtml(q.text)}</div>
+      <div class="q-footer">
+        <span class="q-author">— ${escHtml(q.name)}</span>
+        <button class="like-btn ${liked.includes(q.id)?'liked':''}" onclick="toggleLike('${q.id}')" ${liked.includes(q.id)?'disabled':''}>
+          👍 ${q.likes}
+        </button>
+      </div>
+    </div>`).join('');
+}
+function toggleLike(id) {
+  if (liked.includes(id)) return;
+  liked.push(id);
+  localStorage.setItem('qa-liked', JSON.stringify(liked));
+  const q = questions.find(x => x.id === id);
+  if (q) { q.likes++; saveQ(); }
+  renderBoard();
+}
+
+// ========== ADMIN ==========
+function adminLogin() {
+  const pass = document.getElementById('admin-pass').value;
+  if (pass === ADMIN_PASS) {
+    adminUnlocked = true;
+    document.getElementById('admin-login').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    renderAdmin();
+  } else {
+    document.getElementById('admin-error').textContent = 'パスワードが違います';
+  }
+}
+function renderAdmin() {
+  document.getElementById('admin-count').textContent = questions.length;
+  const el = document.getElementById('admin-list');
+  if (questions.length === 0) { el.innerHTML = '<div class="empty">質問はありません</div>'; return; }
+  el.innerHTML = questions.map(q => `
+    <div class="q-card ${q.answered?'answered':''}" id="aqc-${q.id}">
+      <div class="q-meta">
+        <span style="font-size:13px;color:#a78bfa">${escHtml(q.name)} · ${q.ts} · 👍 ${q.likes}</span>
+        <div class="admin-actions">
+          <button class="btn-sm ${q.answered?'':'btn-success'}" onclick="toggleAnswered('${q.id}')">${q.answered?'未回答に戻す':'回答済み ✅'}</button>
+          <button class="btn-sm btn-danger" onclick="deleteQ('${q.id}')">削除</button>
+        </div>
+      </div>
+      <div class="q-text">${escHtml(q.text)}</div>
+    </div>`).join('');
+}
+function toggleAnswered(id) {
+  const q = questions.find(x => x.id === id);
+  if (q) { q.answered = !q.answered; saveQ(); renderAdmin(); }
+}
+function deleteQ(id) {
+  questions = questions.filter(x => x.id !== id);
+  saveQ(); renderAdmin(); updateTabCount();
+}
+function clearAll() {
+  if (confirm('全質問を削除しますか？')) { questions = []; saveQ(); renderAdmin(); updateTabCount(); }
+}
+
+// ========== UTILS ==========
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function updateTabCount() {
+  document.getElementById('tab-board').textContent = 'ボード (' + questions.length + ')';
+}
+
+// ========== QR CODE ==========
+function generateQR() {
+  const url = location.href;
+  const el = document.getElementById('qrcode');
+  el.innerHTML = '';
+  try {
+    new QRCode(el, { text: url, width: 140, height: 140, colorDark:'#000', colorLight:'#fff', correctLevel: QRCode.CorrectLevel.M });
+    document.getElementById('qr-label').textContent = 'このURLをスキャンして参加';
+  } catch(e) {
+    document.getElementById('qr-label').textContent = url;
+  }
+}
+
+// ========== INIT ==========
+updateTabCount();
+window.addEventListener('load', generateQR);
+
+// Auto-refresh board every 5s
+setInterval(() => {
+  questions = JSON.parse(localStorage.getItem('qa-questions') || '[]');
+  updateTabCount();
+  if (currentTab === 'board') renderBoard();
+  if (currentTab === 'admin' && adminUnlocked) renderAdmin();
+}, 5000);
+</script>
+
+
+</body></html>
